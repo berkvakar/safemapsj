@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+        <title>SafeMapSJ</title>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"  integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="  crossorigin=""/> 
+        <link href="../static/main.css" rel="stylesheet" />
+    </head>
+    <body>
+        <header class="header">
+            <div>
+                <a class="head-title" href="{{url_for('routes.index')}}">
+                    <img class="head-img" src="{{ url_for('static', filename='logo.png') }}" alt="">
+                </a>
+            </div>
+        </header>
+        
+
+        <main>
+            
+            <div class="main-flex">
+                
+                <div id="map-container"></div>
+
+                <div class="info-container">
+                    <div class="neighbor-flex">
+                        <div class="neighbor-name">{{nName}}</div>
+                    </div>
+            
+                    <div>
+                        <div class="trend-head">Trends</div>
+                        <div class="trend-flex">
+                            <div class="trend-item">
+                                <div class="score-head">Safety Score</div>
+                                <div class="score">{{nScore}}</div>
+                                <div class="year-flex">
+                                    <div class="year-item">
+                                        <div class="year-head">{{fiveScore}}</div>
+                                        <div class="year">5 year</div>
+                                    </div>
+                                    <div class="year-item">
+                                        <div class="year-head">{{tenScore}}</div>
+                                        <div class="year">10 year</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="trend-item">
+                                <div class="score-head rating-flex">Resident Rating Score</div>
+                                    <div class="score">{% if rating == 0 %}
+                                            N/A
+                                        {% else %}
+                                            {{ rating }}/5
+                                        {% endif %}
+                                    </div>
+                                    <div class="stars">
+                                        <span class="star">&#9733;</span>
+                                        <span class="star">&#9733;</span>
+                                        <span class="star">&#9733;</span>
+                                        <span class="star">&#9733;</span>
+                                        <span class="star">&#9733;</span>
+                                    </div>
+                                </div>
+                                
+                            
+                            </div>
+                        </div>
+                        <script>
+                            stars = document.getElementsByClassName('star');
+                            console.log(stars);
+                            for(var i = 0; i < stars.length; i++){
+                                console.log(stars[i]);
+                                console.log("{{rating}}");
+                                if ("{{rating}}" >= (i+1)){
+                                    stars[i].classList.add('gold');
+                                }
+                                else {
+                                    stars[i].classList.add('grey');
+                                }
+                            }   
+                            document.addEventListener("DOMContentLoaded", function (){
+                                const stars = document.querySelectorAll('.stars . star');
+                                const rating = parseFloar("{{ rating }}");
+                                    stars.forEach((star,index) => {
+                                        if (index < rating) {
+                                            star.style.color = "gold";
+                                        } else {
+                                            star.style.color = "#ccc";
+                                        }
+                                    }
+                                )
+                            })
+                        </script>
+                        <style>
+                           
+                            .star-rating {
+                                direction: rtl;
+                                display: inline-block;
+                                font-size: 60px;
+                            }
+                            .star-rating input {
+                                display: none;
+                            }
+                            .star-rating label {
+                                color: #ccc;
+                                cursor: pointer;
+                            }
+                            .star-rating input:checked ~ label {
+                                color: gold;
+                            }
+                            .star-rating label:hover,
+                            .star-rating label:hover ~ label {
+                                color: gold;
+                            }
+                           
+                        </style>              
+                    <div style="font-size: 3em;">Rate {{nName}}</div>
+                    <div style="display: flex; flex-direction: row;">
+                        <div class="star-rating">
+                            <form id="RatingForm">
+                            <input type="radio" id="star5" name="rating" value="5"><label for="star5">★</label>
+                            <input type="radio" id="star4" name="rating" value="4"><label for="star4">★</label>
+                            <input type="radio" id="star3" name="rating" value="3"><label for="star3">★</label>
+                            <input type="radio" id="star2" name="rating" value="2"><label for="star2">★</label>
+                            <input type="radio" id="star1" name="rating" value="1"><label for="star1">★</label>
+                            </form>
+                        </div>     
+                            <button class="submit" id="submit-btn" onclick="submitRating()">Submit</button>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </main>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        
+        <script>
+                async function submitRating() {
+                    const form = document.getElementById('RatingForm');
+                    if (!form) {
+                        console.error('Form not found');
+                        return;
+                    }
+
+                    const formData = new FormData(form);
+                    const rating = formData.get('rating');
+                    const neighborhood = nName;
+
+                    if (!rating || !neighborhood) {
+                        alert('Please select a rating and provide a neighborhood!');
+                        return;
+                    }
+
+                    console.log('Rating value:', rating);  
+                    console.log('Neighborhood:', neighborhood);
+                    document.getElementById('submit-btn').style.display = "none";
+                    fetch(`/submit-rating?rating=${rating}&neighborhood=${neighborhood}`)
+                    .then(response => response.json)
+                    .then(data => {
+                        console.log(data);
+                    })
+
+
+            }
+    
+        function getColor(score) {
+                let green, red;
+                if (score <= 5) {
+                    red = 255;  
+                    green = 255 - (5- score) * 51; 
+                } else {
+                    red = 255- (score - 5) * 51;
+                    green = 255;   
+                }
+                const blue = 0;
+                return `rgb(${red}, ${green}, ${blue})`;
+            }
+            let score = "{{nScore}}";
+            let nName = "{{nName}}";
+            let rating = "{{rating}}"
+            const map = L.map('map-container',{
+                center: [37.3382, -121.8863],
+                zoom: 10.75,
+                zoomSnap: 0,
+                zoomDelta: 0.25,
+                zoomControl: false,
+                dragging: false,
+                scrollWheelZoom: false,
+                doubleClickZoom: false,
+                boxZoom: false,
+                keyboard: false,
+                touchZoom: false,
+            });
+
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            }).addTo(map);
+
+            const apiUrl = "https://geo.sanjoseca.gov/server/rest/services/OPN/OPN_OpenDataService/MapServer/549/query?where=1%3D1&outFields=*&outSR=4326&f=json";
+            var polygon;
+            
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    data.features.forEach(feature => {
+                        if(feature.attributes.NAME != nName){
+                            return;
+                        }
+                        const coords = feature.geometry.rings[0].map(coord => [coord[1], coord[0]]);
+                        polygon = L.polygon(coords, {
+                            color: getColor(score),
+                            fillOpacity: 0.4,
+                        }).addTo(map)
+                        
+                    });
+                    const center = polygon.getBounds().getCenter();
+                    console.log(center);
+                    map.setView(center, 10.75);
+                    const bounds = polygon.getBounds();
+                    map.fitBounds(bounds);
+
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        </script>
+    </body>
+</html>

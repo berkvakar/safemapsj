@@ -1,0 +1,114 @@
+import urllib.request
+import pandas as pd
+import numpy as np
+import geopandas as gpd
+from shapely.geometry import Point
+import json
+import warnings
+import boto3
+import geocoder
+import csv
+  
+url = 'https://data.sanjoseca.gov/api/3/action/datastore_search?resource_id=c19a01f2-33e1-4c66-9498-85d489f90da4' 
+fileobj = urllib.request.urlopen(url)
+response_dict = json.loads(fileobj.read())
+data = response_dict['result']['records']
+
+def add_crash(neighborhood, crash):
+    if neighborhood not in crash_data:
+        crash_data[neighborhood] = []
+
+    json_data = crash
+    data = {
+            "MinorInjuries": json_data["MinorInjuries"],
+            "ModerateInjuries": json_data["ModerateInjuries"],
+            "SevereInjuries": json_data["SevereInjuries"],
+            "FatalInjuries": json_data["FatalInjuries"],
+            "CityDamageFlag": json_data["CityDamageFlag"],
+            "CollisionType": json_data["CollisionType"],
+            "CrashDateTime": json_data["CrashDateTime"]
+    }
+    crash_data[neighborhood].append(data)
+
+
+def find_crash():
+    i = 0
+    for crash in data:
+        i += 1
+        if i == 11: #stop at 11 crashes for now
+            break
+        latitude = crash["Latitude"]
+        longitude = crash["Longitude"]
+        neighborhood = location(latitude, longitude)
+        if neighborhood != "Unknown":
+            add_crash(neighborhood, crash) 
+
+#crash_data = {}
+#find_crash()
+#print(crash_data)
+
+
+def location(latitude,longitude):   
+    
+    data = gpd.read_file("Neighborhoods.geojson") #read file
+    #print(data.columns)
+    point = Point(longitude, latitude) #initialize point
+    
+    neighborhood = data[data.geometry.contains(point)] #search neighborhood file for the neighborhood that contains the point
+   
+    if not neighborhood.empty:
+        return neighborhood['NAME'].iloc[0]
+    else:
+        print("Neighborhood Unknown")
+        return None
+      
+
+def get_coords(address):
+    if "BLK" in address:
+        address = address.replace("BLK", "").strip()
+    address += ", SAN JOSE CA"
+    g = geocoder.osm(address)
+    if g.ok:
+        print(g)
+        return location(g.lat, g.lng)
+    else:
+        print("Address not found")
+        return None
+
+
+def process_file(input_file, output_file):
+    updated_data = []
+
+    with open(input_file, mode='r') as file:
+        reader = csv.reader(file)
+        header = next(reader)
+        updated_data.append(header)
+
+        for row in reader:
+            address = row[1]
+            coordinates = get_coords(address)
+            if coordinates is not None:
+                row[1] = coordinates
+                updated_data.append(row)
+    
+    with open(output_file, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerows(updated_data)
+        
+
+#process_file('crimedata.csv', 'updated_data.csv')
+
+def csv_to_json(csv_file, json_file):
+    with open(csv_file, mode='r') as file:
+        reader = csv.DictReader(file)  # Read the CSV as a dictionary
+        
+        # Convert rows to a list of dictionaries
+        rows = [row for row in reader]
+    
+    # Write the JSON data to a file
+    with open(json_file, mode='w') as file:
+        json.dump(rows, file, indent=4)  # Use indent=4 for pretty-printing
+
+#csv_file = 'updated_data.csv' 
+#json_file = 'cdata.json'  
+#csv_to_json(csv_file, json_file)

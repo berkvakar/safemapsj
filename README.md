@@ -1,2 +1,1 @@
-# safemapsj
-scu hackathon
+# scuhackathon

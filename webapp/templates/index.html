@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet" />
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css"  integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="  crossorigin=""/> 
+      <link href="../static/main.css" rel="stylesheet" />
+      <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+      <title>SafeMapSJ</title>
+   </head>
+   <body>
+    <header class="header">
+        <div>
+            <a class="head-title" href="{{url_for('routes.index')}}">
+                <img class="head-img" src="{{ url_for('static', filename='logo.png') }}" alt="">
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <div class="main-flex">
+            <div id="map-container"></div>
+            
+            <div class="info-container">
+                <form id="neighborhood-form" onsubmit="return submitForm(event)">
+                    <input id="search" type="text" name="neighborhood" placeholder="Start typing a neighborhood..." autocomplete="off">
+                    <button class="submit" type="submit">Submit</button>
+                </form>
+            </div>
+
+        </div>
+    </main>
+   </body>
+   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+   <script>
+
+        const neighborhoods = ["Canoas Garden and Almaden", "Gramercy and Alexander", "Farm and Rubino Dr", "Mayfair", "Owsley", "Spanish Cove", "Tropicana and Lanai", "Valley Palms", "Olinder-McKinley", "Park Pleasant and Mount Pleasant", "Cassell and Foxdale", "Dobern and Capitol Park", "Sierra Vista", "Fruitdale and Sherman Oaks", "Los Arboles", "Andrew Hill and Sylvandale", "Hellyer", "Silver Creek High School", "Pink Elephant and PAL", "Sheppard", "Plata Arroyo", "Lyndale", "Overfelt High", "Independence and Jackson", "The Glens", "Las Plumas", "La Pala", "John Vianney", "Guadalupe Washington", "Goodyear Mastic", "Cureton and Joseph George", "Hillview", "Bonita Park", "Gimelli-Delano Manongs", "East Hills and White", "Checkers", "Alexian and Jackson", "Alma", "Olinder-Brookwood Terrace", "Welch Park", "Communications Hill", "Seven Trees and Lairon", "The Plant", "Valley Christian", "Skyway and Monterey", "Coyote and Senter", "Roundtable", "Davis and Roeder", "The Woods", "Edenvale", "Norwood", "Calico Creek", "Evergreen Valley High", "Quimby Oak", "Chaboya", "Stonegate", "Aborn and Silver Creek", "Dahl", "Windmill Springs", "Dove Hill", "La Vey", "YB Lucretia", "Spartan Keyes and Wool Creek", "Virginia and Martha", "Little Saigon and Spring Brook", "Hoffman Via Monte", "Starbird", "Cadillac Winchester", "Parkmoor", "Fruitdale", "Richmond Menker", "Burbank", "St James Park", "Stripe Elementary and Great Oaks", "Oak Grove", "Poco", "Lido", "Toyon", "Golf and Gridley", "Pacina", "Boeger and Fernish Park", "Mount Pleasant", "Warner Heights", "Kolmar and Ryan", "Sundown", "James Lick and Pleasant Ridge", "Warm Springs", "Meadow Fair", "West Evergreen", "Fairground", "Umbarger", "Japantown and Hensley", "Julian St James", "Horace Mann and SJSU", "Downtown and SOFA", "South University", "Roosevelt", "Turtle Rock and Meadows", "Mount Alban and Sunshadow and Olinder Industrial", "Greater Santee", "Naglee", "Luna Park", "Northside-Empire Gardens", "Hyde Park", "Japantown and Luna Park", "Wooster and East Ct and West Ct", "Northside-Grant", "Northside-Backesto", "Valley Medical", "Monroe", "Rose Garden", "Winchester Lynnhaven", "Mitty", "Blackford", "Rogers", "Murdock", "Calabazas", "Cypress", "Alviso", "Trimble Business Area", "Rosemary", "Tasman and Zanker", "Airport", "Walnut and N Bascom", "Alameda", "O'Connor", "Valley Fair", "Sierramont", "Piedmont Hills and St Victor", "Majestic", "Berryessa Creek", "Cataldi", "North Berryessa", "Sierra Vista Hills", "Noble", "Suncrest", "Penitencia Creek", "Commercial", "Vinci Park", "Flickinger", "Berryessa Flea Market-BART", "North Valley", "Orchard", "Brooktree", "Brokaw", "Ruskin", "Cherrywood", "Cadwallader", "Fowler Creek", "Silver Creek Country Club", "Meadowlands", "The Villages", "Villages", "Estates", "Piedmont", "Valle Vista", "Thompson Creek", "Reed", "Dry Creek", "Cherry", "Willow Vale", "Tamien", "The Willows", "River Glen", "Southwest", "Stokes", "South Stokes", "Greylands", "Palmhaven", "North Willow Glen", "Downtown Lincoln Ave", "Gardner", "Steindorf-Doerr", "Lincoln Glen", "Schallenberger", "Willow Glen South", "Kirk", "Baldwin", "Los Paseos", "Metcalf", "Santa Teresa Country Club", "Santa Teresa", "Village Oaks", "Parma", "La Colina", "Palmia Park", "Calero and Oak Ridge", "Glider", "Sakamota", "Frost and Herman", "Chesbro", "Cahalan", "Steinbeck and Allen", "Almaden Lake", "Martial Cottle Park", "Farnham", "Cambrian Park", "Houge Parker", "Oster", "Sartortte and Rose", "Branham/Pearl and Erikson", "Branham", "Hammer", "Pinehurst", "Thousand Oaks", "Valley View Reed", "Narvaez", "Briarwood", "Bagby", "Cambrian", "Campbell Village Shamrock", "Guadalupe Oak Grove", "Los Alamitos", "Holy Spirit", "Los Alamitos Creek", "Graystone", "Singer Park", "McKean", "Quicksilver", "Santa Teresa Hills", "Williams", "Almaden Country Club", "Castillero and Simonds", "Trinidad", "Almaden Meadows", "Guadalupe", "Redmond", "Almaden Winery", "Dartmouth", "Hayes", "Park View", "Carson and Meadows", "Rosenbaum", "Gunderson and Vista Park", "Playa del Rey", "Good Samaritan", "Carlton", "Los Gatos Memorial", "Union", "Carden", "Lone Hill", "Noddin and Leigh", "Baker West", "English Estates", "Hamann Park", "Winchester", "Moreland West", "San Tomas West", "Strawberry Park", "Westgate Village", "Blossom Valley", "Silver Leaf", "Delmas Park", "University", "Riverbend/Golden Wheel/South Bay", "Vendome and Ryland", "Shasta/Hanchett Park", "Sunrise Almaden", "Ramblewood/Tuers", "Mulberry", "Coyote Creek North", "Forest Hill/Westmont", "Belwood-Belgatos", "Alta Vista", "San Tomas Aquino Park", "Guadalupe", "Muir", "O'Connor Park", "Diridon", "Coleman", "Stevens Creek", "Kooser", "Dentwood", "Willow Glen West", "Santa Teresa West", "Willowmont", "Lincoln and Roy", "Civic Center", "Commercial", "Berryessa Crossing", "Almaden Guadalupe Park", "Country Lane", "Ballbach and SOFA", "San Pedro and Convention Center", "Five Wounds-San Jose High", "Little Portugal", "San Jose Country Club", "Linda Vista and Hillcrest", "East Foothills", "Mount Pleasant Foothills", "Ocala", "Shady Oaks and Basking Ridge", "Coyote Creek", "Rancho Santa Teresa Mobile Homes", "Magic Sands Mobile Homes", "Westfield Oakridge", "Foxchase and Oakridge"]; 
+
+        const searchInput = document.getElementById('search');
+
+        searchInput.addEventListener('input', function() {
+            const value = this.value;
+            closeAutocomplete();
+            if (!value) return;
+
+            const filteredNeighborhoods = neighborhoods.filter(neighborhood => 
+                neighborhood.toLowerCase().includes(value.toLowerCase())
+            );
+
+            if (filteredNeighborhoods.length > 0) {
+                showAutocomplete(filteredNeighborhoods);
+            }
+        });
+
+        function showAutocomplete(matches) {
+            const autocompleteDiv = document.createElement('div');
+            autocompleteDiv.setAttribute('class', 'autocomplete-items');
+
+            matches.forEach(neighborhood => {
+                const item = document.createElement('div');
+                item.innerText = neighborhood;
+                item.addEventListener('click', function() {
+                    searchInput.value = neighborhood;
+                    closeAutocomplete();
+                });
+                autocompleteDiv.appendChild(item);
+            });
+
+            searchInput.parentNode.appendChild(autocompleteDiv);
+        }
+
+        function closeAutocomplete() {
+            const autocompleteItems = document.querySelector('.autocomplete-items');
+            if (autocompleteItems) {
+                autocompleteItems.parentNode.removeChild(autocompleteItems);
+            }
+        }
+
+        function submitForm(event) {
+            event.preventDefault();
+
+            const name = searchInput.value;
+            if (name) {
+                window.location.href = `{{url_for('routes.neighborhood')}}?nName=${encodeURIComponent(name)}`;
+            }
+        }
+        const scores = [8.5, 7.3, 7.2, 7.5, 9.8, 9.1, 6.5, 9.5, 7.5, 6.0, 9.5, 7.5, 9.2, 7.5, 8.0, 7.0, 7.8, 4.5, 8.5, 7.5, 8.2, 9.5, 7.5, 8.2, 8.5, 8.5, 8.5, 7.8, 8.7, 9.8, 6.5, 8.5, 8.5, 9.2, 7.5, 8.2, 7.5, 3.5, 7.5, 9.5, 9.0, 8.7, 9.5, 6.0, 8.5, 8.0, 7.5, 7.8, 8.2, 9.5, 7.5, 9.0, 8.5, 9.5, 8.5, 7.2, 7.5, 8.5, 9.0, 7.5, 8.2, 7.2, 8.1, 8.2, 7.2, 8.7, 8.5, 8.0, 7.5, 6.5, 8.5, 7.8, 7.5, 8.5, 6.5, 8.5, 8.5, 8.5, 8.5, 9.7, 8.5, 5.0, 6.8, 8.5, 9.2, 7.5, 9.0, 7.5, 8.5, 7.5, 9.7, 9.0, 7.5, 7.5, 9.0, 7.5, 7.5, 7.5, 8.5, 9.5, 8.0, 8.2, 8.5, 9.8, 9.0, 6.0, 7.2, 7.5, 6.5, 8.0, 5.0, 8.5, 8.5, 9.5, 7.5, 9.5, 7.0, 8.5, 8.2, 7.5, 7.5, 8.5, 9.5, 6.5, 7.5, 6.5, 7.2, 7.5, 9.5, 8.5, 8.5, 8.5, 7.2, 8.2, 8.5, 9.2, 7.2, 7.5, 8.4, 7.8, 9.5, 8.2, 7.8, 8.5, 8.5, 7.3, 8.9, 9.5, 7.5, 7.8, 9.5, 10.0, 10.0, 8.5, 9.5, 9.8, 8.5, 7.2, 9.5, 7.5, 8.5, 7.0, 7.5, 8.2, 7.5, 8.5, 9.0, 9.2, 8.5, 7.5, 8.5, 8.5, 7.5, 8.5, 8.5, 8.5, 8.2, 7.5, 8.5, 6.3, 7.5, 8.2, 8.5, 8.2, 7.5, 8.5, 8.5, 7.5, 8.5, 8.5, 7.5, 8.2, 6.2, 9.5, 8.2, 9.5, 8.2, 8.5, 9.8, 9.5, 6.5, 8.5, 7.5, 8.5, 8.5, 3.8, 8.2, 9.1, 5.5, 8.5, 8.2, 6.5, 8.2, 8.5, 8.5, 7.8, 6.5, 7.5, 9.5, 8.0, 7.2, 9.8, 8.5, 7.2, 7.9, 8.5, 9.5, 8.5, 8.5, 8.3, 6.0, 8.5, 7.5, 7.5, 7.8, 8.5, 7.5, 8.5, 7.5, 8.2, 9.5, 8.5, 9.0, 8.5, 9.5, 8.2, 7.8, 7.2, 7.5, 6.8, 8.5, 7.5, 7.2, 7.2, 8.5, 7.8, 7.5, 8.5, 7.5, 7.8, 8.5, 7.6, 7.2, 9.2, 9.0, 9.0, 7.5, 7.5, 8.2, 7.4, 8.5, 9.2, 8.5, 7.5, 8.5, 8.3, 8.5, 8.5, 7.2, 8.5, 7.5, 9.5, 6.2, 7.1, 3.5, 7.5, 9.0, 7.5, 7.0, 5.0, 6.2, 5.2, 8.5, 7.8, 6.5, 8.5, 7.5]
+        const map = L.map('map-container',{
+            center: [37.3382, -121.8863],
+            zoom: 10.75,
+            zoomSnap: 0,
+            zoomDelta: 0.25,
+            zoomControl: true,
+            dragging: true,
+            scrollWheelZoom: true,
+            doubleClickZoom: false,
+            boxZoom: false,
+            keyboard: false,
+            touchZoom: false,
+            minZoom: 10.75 
+        });
+        
+       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+       }).addTo(map);
+
+       const apiUrl = "https://geo.sanjoseca.gov/server/rest/services/OPN/OPN_OpenDataService/MapServer/549/query?where=1%3D1&outFields=*&outSR=4326&f=json";
+
+      
+       fetch(apiUrl)
+           .then(response => response.json())
+           .then(data => {
+            index = 0
+               data.features.forEach(feature => {
+                    const coords = feature.geometry.rings[0].map(coord => [coord[1], coord[0]]);
+                    const name = feature.attributes.NAME;
+                    var polygon = L.polygon(coords, {
+                        color: getColor(scores[index]),
+                        fillOpacity: 0.5,
+                    }).addTo(map)
+                    ///
+                    
+                    polygon.on('click', function () {
+                        window.location.href = `{{url_for('routes.neighborhood')}}?nName=${encodeURIComponent(name)}`;
+                    });
+
+                    polygon.on('mouseover', function () {
+                        polygon.setStyle({
+                            weight: polygon.options.weight + 2,     
+                            fillOpacity: polygon.options.fillOpacity + .04 })
+                        polygon.bringToFront();
+                        polygon.bindTooltip(name, {
+                            permanent: false,
+                            direction: 'up',
+                            opacity: 0.7})
+                        polygon.openTooltip();
+                    });
+
+                    polygon.on('mouseout', function () {
+                        polygon.setStyle({
+                            weight: polygon.options.weight - 2,     
+                            fillOpacity: polygon.options.fillOpacity - .04 })
+                        polygon.closeTooltip();
+                    });
+                    index += 1;
+               });
+           })
+           .catch(error => console.error('Error fetching data:', error));
+
+           function getColor(score) {
+                let green, red;
+                if (score <= 5) {
+                    red = 255;  
+                    green = 255 - (6 - score) * 51; 
+                } else {
+                    red = 255- (score - 5) * 51;
+                    green = 255;   
+                }
+                const blue = 0;
+                return `rgb(${red}, ${green}, ${blue})`;
+            }
+   </script>
+   <script src="main.js"></script>
+</html>

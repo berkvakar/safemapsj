@@ -1,0 +1,283 @@
+* {
+  font-family: 'Ubuntu', sans-serif;
+
+}
+
+.header{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.head-title{
+  margin: 1rem;
+  display: flex;
+  justify-self: center;
+}
+
+.head-img{
+  height: 6rem;
+  width: auto;
+}
+
+.map-container{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.map {
+  height: 500px;
+  width: 100%;
+}
+
+
+.main-flex{
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+  padding-left: 4rem;
+  padding-right: 4rem;
+}
+
+.info-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  align-content: stretch;
+}
+
+.neighbor-flex{
+  display: flex;
+  flex-direction: row;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.neighbor-name{
+  font-size: 4rem;
+  font-weight: bold;
+  flex-grow: 1;
+}
+
+.neighbor-score{
+  font-size: 4rem;
+  font-weight: bold;
+}
+
+.trend-head{
+  text-align: start;
+  margin-top: 1rem;
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.trend-flex{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: normal;
+  align-items: stretch;
+  align-content: stretch;
+}
+
+.trend-item{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  flex-wrap: nowrap;
+  align-content: stretch;
+  margin: 1rem;
+  margin-left: 0;
+  padding: 1rem;
+  border-radius: 10px;
+  border-color: rgb(233, 233, 233);
+  border-width: 3px;
+  border-style: solid;
+}
+
+.score-head{
+  font-size: 2rem;
+
+}
+
+.score{
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.year-flex{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: start;
+  align-items: stretch;
+  align-content: stretch;
+}
+
+.year-item{
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: start;
+  flex-wrap: nowrap;
+  align-content: stretch;
+  margin: .5rem;
+}
+
+.year-head{
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.year{
+  font-size: 1.5rem;
+  color: gray;
+}
+
+#map-container {
+  width: 100%;
+  height: 800px;
+  background-color: white; 
+  border: 1px solid #ccc;
+}
+
+
+* { box-sizing: border-box; }
+body {
+  font: 16px Arial;
+}
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+input {
+  border: 1px solid transparent;
+  background-color: #f1f1f1;
+  padding: 10px;
+  font-size: 2em;
+}
+input[type=text] {
+  background-color: #f1f1f1;
+  width: 100%;
+  flex-grow: 1;
+  
+}
+
+#neighborhood-form{
+  display: flex;
+  flex-direction: row;
+  margin-top: 1rem;
+  width: 600px;
+}
+
+.submit {
+  background-color: rgba(51, 51, 51, 0.05);
+  border-radius: 8px;
+  border-width: 0;
+  color: #333333;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 2em;
+  font-weight: 500;
+  line-height: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 10px 12px;
+  text-align: center;
+  vertical-align: baseline;
+  margin-left: 1rem;
+}
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 9999;
+  background-color: white;
+  width: 100%;
+}
+
+.autocomplete-items div {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.autocomplete-items div:hover {
+  background-color: #ddd;
+}
+
+
+@media (min-width: 1000px) {
+  .main-flex {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  #map-container {
+    flex-grow: 1;
+    width: 100%;
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  * {
+    font-size: 90%;
+  }
+  .info-container{
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+  .head-img{
+    height: 4rem;
+    width: auto;
+  }
+}
+
+.testbutton {
+  color: #FFFFFF;
+  background: none;
+  padding: 5px;
+  cursor: pointer;
+  border: 2 px solid #3866A3
+
+}
+.testbutton:hover {
+  color: #FFEC40
+}
+
+.stars {
+  display: flex;
+  font-size: 30px; 
+  display: flex;
+  justify-content: flex-start;
+  gap: 5px;
+}
+.star {
+  margin-right: 5px; 
+  color: #ccc;
+  transition: color 0.3s ease;
+}
+
+.gold {
+  color: gold; 
+}
+
+.grey {
+  color: grey; /* Grey color for the empty stars */
+}
+
+
+.rating-flex{
+  display: flex;
+  flex-direction: column;
+}
